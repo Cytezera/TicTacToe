@@ -23,7 +23,6 @@ void connectClient(){  //all the comments are to explain to my future self in ve
 
 	runGame(client1, client2 ) ; 
 	close (client1, client2) ;
-	cloes 
 	close(serverSocket) ;
 	
 }
@@ -51,42 +50,25 @@ void displayBoard(vector<vector<string>> board){
 	cout << "\n"; 
 }
 
-void chooseTurn(string& turn){
+void chooseTurn(string& turn, int playerTurn, int client1 , int client2 ){
 	if (turn == "X"){
-		turn = "O"; 
+		turn = "O";
+	       	playerTurn = client2; 	
 	}else {
 		turn = "X";	
-	
+		playerTurn = client1; 	
 	}	
 }
 
-void placeTile(string turn, vector<vector<string>> &board){
-	int row, col; 	
-	bool check; 
-	do { 
-		cout << "It is " << turn << "'s turn" << endl; 
-		cout << "Please select the row you would like to place : " << endl; 
-		cin >> row; 
-		cout << "Please select the column you would like to place : " << endl; 
-		cin >> col;
-	       	if (board[row][col] != " ") {
-			cout << "Invalid input, please try again" << endl; 
-			check = false; 	
-		}else { 
-			board[row][col] = turn; 
-			check = true ;			
-		} 	
-	}while(!check);		
-
-
-}
 
 void checkResult (bool& gamerun, vector<vector<string>> board, string turn) {
 	
 	if ((board[0][0] == board[1][1] && board[1][1] == turn && board[2][2] == turn ) || ( board[0][2] == board[1][1] && board[1][1] == turn && board[2][0] == turn )) {
 
 		displayBoard(board); 
-		cout << turn << " wins " << endl;
+		string winMsg = "The winner is " + turn ; 
+		send(client1, winMsg.c_str(), winMsg.size(), 0 ) ;
+		send(client2, winMsg.c_str(),winMsg.size(),0); 
 	        gamerun = false; 
        		return; 		       
 	}	
@@ -95,7 +77,9 @@ void checkResult (bool& gamerun, vector<vector<string>> board, string turn) {
 		if ((board[i][0] == board[i][1] && board[i][1] == turn &&  board[i][2] == turn ) || (board[0][i]==board[1][i] && board[1][i] == turn && board[2][i] == turn )) { 
 
 			displayBoard(board); 
-			cout << turn <<  " wins " << endl; 
+			string winMsg = "The winner is " + turn ; 
+			send(client1, winMsg.c_str(), winMsg.size(), 0 ) ;
+			send(client2, winMsg.c_str(),winMsg.size(),0); 
 			gamerun = false;
 			return ;	
 			
@@ -111,19 +95,52 @@ void checkResult (bool& gamerun, vector<vector<string>> board, string turn) {
 		}
 	} 
 	displayBoard(board);	
-	cout << "It is a draw " << endl; 
+	string drawMsg = "It is a draw \n " ;
+	send(client1, drawMsg.c_str(), drawMsg.size() , 0 ) ;
+	send(clietn2, drawMsg.c_str(), drawMsg.size(), 0 ) ; 	
 	gamerun = false; 
 	return ;
+
 } 
+
+void sendClientData(string turn, int playerTurn, vector<vector<int>> &board) { 
+	string boardData = ""; 
+	int row , col;
+       	bool inputRecieve = true; 	
+	for (int i = 0; i < 3 ; i ++ ) { 
+		for (int j = 0 ; j < 3 ; j++ ) {
+	     		boardData += board[i][j] + " " ;  
+	
+			
+		}
+	}
+	boardData += turn; 
+	do { 
+		send(playerTurn, boardData.c_str(), boardData.size(), 0 ) ; 
+		recv(playerTurn, &row, sizeof(row), 0 ); 
+		recv(playerTurn, &row, sizeof(col), 0) ; 
+		if (board[row][col] != " ") { 
+			string errorMsg = "Invalid input"; 
+			send (playerTurn, errorMsg.c_str(), errorMsg.size(), 0 ) ; 
+			inputRecieve = false;
+			
+		}else {
+			inputRecieve = true; 
+			board[row][col] = turn; 
+		}	
+
+	}while (inputRecieve) ;
+
+}
 void runGame(int client1, int client2 ){
 	vector<vector<string>> board(3,vector<string>(3)); 
 	restartBoard(board); 
 	bool gamerun = true; 
 	int playerTurn = client1; 
 	while (gamerun){
-		chooseTurn(turn); 
+		chooseTurn(turn,playerTurn,client1,client2); 
 		displayBoard(board); 	
-		placeTile(turn, board); 			
+		sendClientData(turn,playerTurn,board); 
 		checkResult(gamerun,board,turn);	
 	};
 

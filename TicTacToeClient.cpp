@@ -2,14 +2,27 @@
 #include <vector>
 using namespace std; 
 
-void restartBoard(vector<vector<string>> &board){
-	for (int i= 0; i < 3; i ++){
-		for (int j=0; j< 3; j ++) {
-			board[i][j] = " "; 
-		}
-	}
-}		
+void connectServer() {
+	int clientSocket;
+	struct sockaddr_in serverAddr; 
+	char buffer[1024] = {0};
 
+	clientSocket = socket (AF_INET, SOCK_STREAM) , 0 ) ; 
+	serverAddr.sin_family = AF_INET; 
+	serverAddr.sin_port = htons(8080); 
+       	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr));
+	
+	recv(clientSocket, buffer, 1024, 0 ) ;
+	cout << buffer; 
+	int row , col; 
+	cout << "Please enter the row " << endl; 	
+	cin >> row; 
+	cout << "Please enter the column " << endl; 
+	cin >> col ;	
+
+	
+}
 void displayBoard(vector<vector<string>> board){
 	cout << "  0 1 2" << endl; 
 	for (int i=0; i < 3 ; i ++) {
@@ -106,30 +119,6 @@ void ticTacToe(){
 int main() 
 
 {
-	int userInput; 
-	do{
-		cout << "What would you like to do?" << endl; 
-		cout << "1. Play" << endl; 
-		cout << "2. Exit" << endl;
-	       	cin >> userInput ; 	
-		switch (userInput){
-
-			case 1: 
-				ticTacToe();
-				break; 
-			case 2: 
-				cout << "Goodbye" << endl; 
-				break; 
-			default: 
-				cout << "Invalid input" ; 
-				cin.clear();	
-		}
-		
-	
-	
-	
-		}while(userInput !=2) ;	
-
-
+	connectServer() ;
 		return 0 ; 
 	}
