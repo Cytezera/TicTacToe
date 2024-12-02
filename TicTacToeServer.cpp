@@ -10,7 +10,22 @@ void connectClient(){  //all the comments are to explain to my future self in ve
 	serverSocket = socket(AF_INET, SOCK_STREAM, 0) ; //creates the bridge , AFINET is telling it to use IPV4 and sockstream tells it to use tcp
 	serverAddr.sin_family = AF_INET; // Setting the server IP to sue IPV4 
       	serverAddr.sin_port = htons(8080); // seeting the port to be 8080  	
-	serverAddr.sin_addr.s_addr = INADDR_ANY; // setting the ip address but in 32 bit form 
+	serverAddr.sin_addr.s_addr = INADDR_ANY; // setting the ip address but in 32 bit form
+	bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr); // setting up to accept clients 
+	listen(serverSocket, 2) ; // accept only 2 clients 
+	cout << "Connecting ..... " << endl; 
+	addr_size = sizeof(clientAddr); 
+	client1 = accept(serverSocket, (struct sockaddr*)&serverAddr, &addr_size);
+	cout << "Player 1 has joined  "<< endl; 
+
+	client2 = accept(serverSocket, (struct sockaddr*)&serverAddr, &addr_size); 
+	cout << "Player 2 has joined "  << endl ;
+
+	runGame(client1, client2 ) ; 
+	close (client1, client2) ;
+	cloes 
+	close(serverSocket) ;
+	
 }
 
 
@@ -100,11 +115,11 @@ void checkResult (bool& gamerun, vector<vector<string>> board, string turn) {
 	gamerun = false; 
 	return ;
 } 
-void ticTacToe(){
+void runGame(int client1, int client2 ){
 	vector<vector<string>> board(3,vector<string>(3)); 
 	restartBoard(board); 
 	bool gamerun = true; 
-	string turn = "O"; 
+	int playerTurn = client1; 
 	while (gamerun){
 		chooseTurn(turn); 
 		displayBoard(board); 	
@@ -117,31 +132,9 @@ void ticTacToe(){
 
 int main() 
 
+
 {
-	int userInput; 
-	do{
-		cout << "What would you like to do?" << endl; 
-		cout << "1. Play" << endl; 
-		cout << "2. Exit" << endl;
-	       	cin >> userInput ; 	
-		switch (userInput){
-
-			case 1: 
-				ticTacToe();
-				break; 
-			case 2: 
-				cout << "Goodbye" << endl; 
-				break; 
-			default: 
-				cout << "Invalid input" ; 
-				cin.clear();	
-		}
-		
-	
-	
-	
-		}while(userInput !=2) ;	
+	connectClient(); 	
 
 
-		return 0 ; 
-	}
+}
