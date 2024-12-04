@@ -1,5 +1,9 @@
 #include <iostream> 
 #include <vector>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 using namespace std; 
 
 void connectServer() {
@@ -7,7 +11,7 @@ void connectServer() {
 	struct sockaddr_in serverAddr; 
 	char buffer[1024] = {0};
 
-	clientSocket = socket (AF_INET, SOCK_STREAM) , 0 ) ; 
+	clientSocket = socket(AF_INET, SOCK_STREAM,0) ; 
 	serverAddr.sin_family = AF_INET; 
 	serverAddr.sin_port = htons(8080); 
        	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -20,7 +24,8 @@ void connectServer() {
 	cin >> row; 
 	cout << "Please enter the column " << endl; 
 	cin >> col ;	
-
+	send(clientSocket, &row, sizeof(row),0) ; 
+	send(clientSocket, &col, sizeof(col),0) ; 
 	
 }
 void displayBoard(vector<vector<string>> board){
@@ -103,7 +108,6 @@ void checkResult (bool& gamerun, vector<vector<string>> board, string turn) {
 } 
 void ticTacToe(){
 	vector<vector<string>> board(3,vector<string>(3)); 
-	restartBoard(board); 
 	bool gamerun = true; 
 	string turn = "O"; 
 	while (gamerun){
